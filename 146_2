@@ -1,1 +1,32 @@
 146(2)
+
+Схема БД состоит из четырех таблиц:
+Product(maker, model, type)
+PC(code, model, speed, ram, hd, cd, price)
+Laptop(code, model, speed, ram, hd, price, screen)
+Printer(code, model, color, type, price)
+
+Таблица Product представляет производителя (maker), номер модели (model) и тип ('PC' - ПК, 'Laptop' - ПК-блокнот или 'Printer' - принтер). 
+Предполагается, что номера моделей в таблице Product уникальны для всех производителей и типов продуктов. 
+В таблице PC для каждого ПК, однозначно определяемого уникальным кодом – code, указаны модель – model (внешний ключ к таблице Product), 
+скорость - speed (процессора в мегагерцах), объем памяти - ram (в мегабайтах), размер диска - hd (в гигабайтах), 
+скорость считывающего устройства - cd (например, '4x') и цена - price (в долларах). 
+Таблица Laptop аналогична таблице РС за исключением того, что вместо скорости CD содержит размер экрана -screen (в дюймах). 
+В таблице Printer для каждой модели принтера указывается, является ли он цветным - color ('y', если цветной), 
+тип принтера - type (лазерный – 'Laser', струйный – 'Jet' или матричный – 'Matrix') и цена - price.
+
+select [chr], nullif([value],'xxx') as [value]
+from (
+select 
+  cast(model as varchar(max)) as model, 
+  cast(speed as varchar(max)) as speed, 
+  cast(ram as varchar(max)) as ram, 
+  cast(hd as varchar(max)) as hd, 
+  cast(cd as varchar(max)) as cd,
+  coalesce(cast(price as varchar(max)),'xxx') as price
+from PC
+where code in (select max(code) from PC)
+) as t1
+unpivot (
+[value] for [chr] in (model, speed, ram, hd, cd, price)
+) as unpvt
